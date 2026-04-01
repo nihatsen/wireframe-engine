@@ -2,8 +2,8 @@
 Whole new level of dark mode for your phone 🤭🤭
 
 
-<img width="768" height="336" alt="image" src="https://github.com/user-attachments/assets/24a09b6f-4ab6-4df1-bd93-bcec492f0a44" />  
-<img width="768" height="336" alt="image" src="https://github.com/user-attachments/assets/62cacbb9-a978-4226-a651-2c6ea9bff726" />
+<img width="359" height="168" alt="image" src="https://github.com/user-attachments/assets/24a09b6f-4ab6-4df1-bd93-bcec492f0a44" />  
+<img width="359" height="168" alt="image" src="https://github.com/user-attachments/assets/62cacbb9-a978-4226-a651-2c6ea9bff726" />
 
 
 
