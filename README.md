@@ -8,3 +8,5 @@ Whole new level of dark mode for your phone 🤭🤭
 
 
 THIS MODULE TURNS YOUR APPS INTO WIREFRAMES!!!! So you can enjoy games, videos, any application at night.. your eyes may rest now 😇😇
+
+Used Sobel Edge algorithm for this module.
