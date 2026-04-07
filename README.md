@@ -35,8 +35,9 @@ I am waiting for your contributions to this module.
 💖💖💖💖
 
 
-------------------AI GENERATED README BEGIN------------------
 
+
+# ⬇️ AI GENERATED README FILE ⬇️
 # 🔲 Wireframe Render Engine
 
 > System-wide GPU-accelerated wireframe rendering for Android — the darkest dark mode you've never seen.
@@ -249,5 +250,3 @@ wireframe-engine/
 ## License
 
 [MIT](LICENSE)
-
-------------------AI GENERATED README END------------------
