@@ -13,4 +13,21 @@ THIS MODULE TURNS YOUR APPS INTO WIREFRAMES!!!! So you can enjoy games, videos, 
 
 Used Sobel Edge algorithm for this module.
 
+Dependencies; 
+ZygiskNext, depth of your heart.
+
 Brawl stars gameplay with this module: https://youtu.be/-Em6uf7pj30
+
+GPUs, driver and renderers might change by device and android version...
+Well, just make it compatible with your own phone. 
+
+Tested on: Xiaomi Redmi Note 8, ROM: Project infinity X Android 16. Kernel: Floppy_v1.2-KSUNext-NOSUS-mitrinket-20251229-0532, Installed this module via KernelSU-Next.
+
+Since my other phone has been broken for almost half a year, I have not been able to test on samsung phones.
+Even so, you would have to modify this module to work on your specific device model.
+
+
+All from my heart to; you.
+I am waiting for your contributions for this module.
+
+💖💖💖💖
