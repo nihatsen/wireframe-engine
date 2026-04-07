@@ -30,6 +30,6 @@ Even so, you would have to modify this module to work on your specific device mo
 
 
 All from my heart to; you.
-I am waiting for your contributions for this module.
+I am waiting for your contributions to this module.
 
 💖💖💖💖
