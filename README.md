@@ -23,7 +23,10 @@ Instagram test: https://youtu.be/tG_CgPhra0g
 GPUs, driver and renderers might change by device and android version...
 Well, just make it compatible with your own phone. 
 
-Tested on: Xiaomi Redmi Note 8, ROM: Project infinity X Android 16. Kernel: Floppy_v1.2-KSUNext-NOSUS-mitrinket-20251229-0532, Installed this module via KernelSU-Next.
+Tested on: Xiaomi Redmi Note 8, 
+ROM: Project infinity X Android 16. 
+Kernel: Floppy_v1.2-KSUNext-NOSUS-mitrinket-20251229-0532, 
+Installed this module via KernelSU-Next.
 
 Since my other phone has been broken for almost half a year, I have not been able to test on samsung phones.
 Even so, you would have to modify this module to work on your specific device model.
