@@ -1,0 +1,853 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Wireframe Engine</title>
+<style>
+:root {
+  --bg: #0d0d0d;
+  --surface: #181818;
+  --surface2: #222;
+  --border: #2a2a2a;
+  --primary: #a78bfa;
+  --primary-dim: rgba(167,139,250,0.15);
+  --primary-glow: rgba(167,139,250,0.08);
+  --text: #ececec;
+  --text-dim: #666;
+  --text-mid: #999;
+  --success: #34d399;
+  --warn: #fbbf24;
+  --danger: #f87171;
+  --radius: 18px;
+  --radius-sm: 12px;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+body {
+  font-family: -apple-system, 'Segoe UI', Roboto, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  padding: 16px 16px 40px;
+  max-width: 520px;
+  margin: 0 auto;
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+/* ── Header ── */
+.header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 20px 4px 22px;
+}
+.header-left h1 { font-size: 20px; font-weight: 700; letter-spacing: -0.4px; }
+.header-left p { font-size: 12px; color: var(--text-dim); margin-top: 3px; }
+.header-right { display: flex; align-items: center; gap: 10px; }
+.status-dot {
+  width: 8px; height: 8px; border-radius: 4px;
+  background: var(--text-dim); flex-shrink: 0;
+  transition: background .3s;
+}
+.status-dot.on { background: var(--success); box-shadow: 0 0 8px var(--success); }
+.status-dot.saving { background: var(--warn); }
+
+/* ── Cards ── */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px;
+  margin-bottom: 10px;
+  transition: opacity .25s;
+}
+.card.dimmed { opacity: 0.38; pointer-events: none; }
+.card-title {
+  font-size: 10px; font-weight: 700; letter-spacing: 1px;
+  text-transform: uppercase; color: var(--text-dim);
+  margin-bottom: 14px;
+}
+
+/* ── Master row ── */
+.master-row {
+  display: flex; align-items: center; justify-content: space-between; gap: 16px;
+}
+.master-text h2 { font-size: 17px; font-weight: 600; }
+.master-text p { font-size: 12px; color: var(--text-dim); margin-top: 4px; transition: color .2s; }
+
+/* ── Toggle ── */
+.toggle-row {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 11px 0; gap: 16px;
+}
+.toggle-row + .toggle-row { border-top: 1px solid var(--border); }
+.toggle-text { flex: 1; min-width: 0; }
+.toggle-text .label { font-size: 14px; }
+.toggle-text .desc { font-size: 12px; color: var(--text-dim); margin-top: 2px; }
+.sw { position: relative; width: 46px; height: 26px; flex-shrink: 0; }
+.sw input { opacity: 0; width: 0; height: 0; position: absolute; }
+.sw-track {
+  position: absolute; inset: 0;
+  background: #333; border-radius: 13px; cursor: pointer;
+  transition: background .2s;
+}
+.sw-thumb {
+  position: absolute;
+  width: 20px; height: 20px; top: 3px; left: 3px;
+  background: #fff; border-radius: 10px;
+  transition: transform .2s; box-shadow: 0 1px 4px rgba(0,0,0,.4);
+  pointer-events: none;
+}
+.sw input:checked ~ .sw-track { background: var(--primary); }
+.sw input:checked ~ .sw-thumb { transform: translateX(20px); }
+
+/* ── Pill chips ── */
+.chips { display: flex; gap: 7px; flex-wrap: wrap; }
+.chip {
+  flex: 1; min-width: 0;
+  padding: 8px 10px; border-radius: 20px;
+  border: 1.5px solid var(--border);
+  background: transparent; color: var(--text-mid);
+  font-size: 12px; font-weight: 500; cursor: pointer;
+  text-align: center; transition: .15s; white-space: nowrap;
+  font-family: inherit;
+}
+.chip:active { transform: scale(0.96); }
+.chip.active {
+  border-color: var(--primary); background: var(--primary-dim);
+  color: var(--primary);
+}
+
+/* ── Sliders ── */
+.slider-block { padding: 6px 0; }
+.slider-block + .slider-block { margin-top: 14px; }
+.slider-head { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 10px; }
+.slider-head .lbl { font-size: 14px; }
+.slider-head .val { font-size: 13px; color: var(--primary); font-weight: 600; }
+input[type=range] {
+  -webkit-appearance: none; width: 100%; height: 3px;
+  background: var(--border); border-radius: 2px; outline: none; cursor: pointer;
+}
+input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 22px; height: 22px; background: var(--primary);
+  border-radius: 11px; box-shadow: 0 0 0 5px var(--primary-glow);
+}
+
+/* ── Color row ── */
+.color-row {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 11px 0; gap: 12px;
+}
+.color-row + .color-row { border-top: 1px solid var(--border); }
+.color-row .lbl { font-size: 14px; }
+.color-swatch-wrap { display: flex; align-items: center; gap: 8px; }
+.color-hex { font-size: 12px; color: var(--text-dim); font-family: monospace; }
+input[type=color] {
+  width: 36px; height: 28px; border: none; border-radius: 8px;
+  background: none; cursor: pointer; padding: 0;
+}
+input[type=color]::-webkit-color-swatch-wrapper { padding: 0; }
+input[type=color]::-webkit-color-swatch { border-radius: 7px; border: 2px solid var(--border); }
+
+/* ── Preset cards row ── */
+.preset-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.preset-card {
+  background: var(--surface2); border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm); padding: 12px 14px;
+  cursor: pointer; transition: .15s; font-family: inherit;
+  text-align: left; color: var(--text-mid);
+}
+.preset-card:active { transform: scale(0.97); }
+.preset-card.active { border-color: var(--primary); background: var(--primary-dim); color: var(--primary); }
+.preset-card .p-icon { font-size: 18px; display: block; margin-bottom: 5px; }
+.preset-card .p-name { font-size: 13px; font-weight: 600; }
+.preset-card .p-desc { font-size: 11px; opacity: 0.7; margin-top: 2px; }
+
+/* ── Bottom status ── */
+.bottom-bar {
+  text-align: center; padding: 20px 0 4px;
+  font-size: 11px; color: var(--text-dim);
+}
+
+/* ── Loading ── */
+#loading {
+  position: fixed; inset: 0; background: var(--bg);
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 14px; z-index: 100;
+}
+#loading .spinner {
+  width: 32px; height: 32px; border: 2px solid var(--border);
+  border-top-color: var(--primary); border-radius: 50%;
+  animation: spin .7s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+</style>
+</head>
+<body>
+
+<div id="loading">
+  <div class="spinner"></div>
+  <div style="color:var(--text-dim);font-size:13px">Loading config...</div>
+</div>
+
+<!-- Header -->
+<div class="header">
+  <div class="header-left">
+    <h1>Wireframe Engine</h1>
+    <p>System-wide edge detection</p>
+  </div>
+  <div class="header-right">
+    <div class="status-dot" id="dot"></div>
+  </div>
+</div>
+
+<!-- Master toggle -->
+<div class="card" id="card-master">
+  <div class="master-row">
+    <div class="master-text">
+      <h2>Wireframe</h2>
+      <p id="master-desc">Loading...</p>
+    </div>
+    <label class="sw" style="width:52px;height:30px">
+      <input type="checkbox" id="sw-enabled">
+      <div class="sw-track" style="border-radius:15px"></div>
+      <div class="sw-thumb" style="width:24px;height:24px;top:3px;left:3px"></div>
+    </label>
+  </div>
+</div>
+
+<!-- Video wireframe -->
+<div class="card" id="card-video">
+  <div class="card-title">Video Wireframe</div>
+  <div class="toggle-row">
+    <div class="toggle-text">
+      <div class="label">Videos &amp; Streaming</div>
+      <div class="desc">YouTube, Gallery, media players</div>
+    </div>
+    <label class="sw"><input type="checkbox" id="sw-video"><div class="sw-track"></div><div class="sw-thumb"></div></label>
+  </div>
+</div>
+
+<!-- Quality presets -->
+<div class="card" id="card-presets">
+  <div class="card-title">Quality Preset</div>
+  <div class="preset-grid">
+    <button class="preset-card" data-preset="perf" onclick="applyPreset('perf')">
+      <span class="p-icon">⚡</span>
+      <div class="p-name">Performance</div>
+      <div class="p-desc">Half-res · Roberts · Skip 1</div>
+    </button>
+    <button class="preset-card" data-preset="balanced" onclick="applyPreset('balanced')">
+      <span class="p-icon">⚖</span>
+      <div class="p-name">Balanced</div>
+      <div class="p-desc">75% res · Sobel · No skip</div>
+    </button>
+    <button class="preset-card" data-preset="quality" onclick="applyPreset('quality')">
+      <span class="p-icon">✦</span>
+      <div class="p-name">Quality</div>
+      <div class="p-desc">Full res · Scharr · No skip</div>
+    </button>
+    <button class="preset-card" data-preset="ultra" onclick="applyPreset('ultra')">
+      <span class="p-icon">◈</span>
+      <div class="p-name">Ultra</div>
+      <div class="p-desc">Full res · Frei-Chen · Compute</div>
+    </button>
+  </div>
+</div>
+
+<!-- Render mode -->
+<div class="card" id="card-mode">
+  <div class="card-title">Render Mode</div>
+  <div class="chips" id="chips-mode">
+    <button class="chip" data-mode="1" onclick="setMode(1)">Wireframe</button>
+    <button class="chip" data-mode="2" onclick="setMode(2)">Overlay</button>
+    <button class="chip" data-mode="3" onclick="setMode(3)">Inverted</button>
+    <button class="chip" data-mode="4" onclick="setMode(4)">Colored</button>
+    <button class="chip" data-mode="5" onclick="setMode(5)">X-Ray</button>
+  </div>
+</div>
+
+<!-- Edge detection -->
+<div class="card" id="card-edge">
+  <div class="card-title">Edge Detection Algorithm</div>
+  <div class="chips" id="chips-quality" style="margin-bottom:18px">
+    <button class="chip" data-q="0" onclick="setQuality(0)">Roberts</button>
+    <button class="chip" data-q="1" onclick="setQuality(1)">Sobel</button>
+    <button class="chip" data-q="2" onclick="setQuality(2)">Scharr</button>
+    <button class="chip" data-q="3" onclick="setQuality(3)">Frei-Chen</button>
+  </div>
+  <div class="slider-block">
+    <div class="slider-head">
+      <span class="lbl">Edge Sensitivity</span>
+      <span class="val" id="v-threshold">0.08</span>
+    </div>
+    <input type="range" id="sl-threshold" min="1" max="100" step="1">
+  </div>
+  <div class="slider-block">
+    <div class="slider-head">
+      <span class="lbl">Line Intensity</span>
+      <span class="val" id="v-intensity">1.2×</span>
+    </div>
+    <input type="range" id="sl-intensity" min="50" max="300" step="5">
+  </div>
+</div>
+
+<!-- Appearance -->
+<div class="card" id="card-appearance">
+  <div class="card-title">Appearance</div>
+  <div class="color-row">
+    <span class="lbl">Line Color</span>
+    <div class="color-swatch-wrap">
+      <span class="color-hex" id="hex-line">#ffffff</span>
+      <input type="color" id="col-line" value="#ffffff">
+    </div>
+  </div>
+  <div class="color-row">
+    <span class="lbl">Background Color</span>
+    <div class="color-swatch-wrap">
+      <span class="color-hex" id="hex-bg">#000000</span>
+      <input type="color" id="col-bg" value="#000000">
+    </div>
+  </div>
+  <div class="slider-block" style="margin-top:14px">
+    <div class="slider-head">
+      <span class="lbl">Background Opacity</span>
+      <span class="val" id="v-opacity">0%</span>
+    </div>
+    <input type="range" id="sl-opacity" min="0" max="100" step="1">
+  </div>
+</div>
+
+<!-- Performance -->
+<div class="card" id="card-perf">
+  <div class="card-title">Performance</div>
+  <div class="slider-block">
+    <div class="slider-head">
+      <span class="lbl">Processing Resolution</span>
+      <span class="val" id="v-resolution">100%</span>
+    </div>
+    <input type="range" id="sl-resolution" min="25" max="100" step="5">
+  </div>
+  <div style="margin-top:14px">
+    <div class="toggle-row">
+      <div class="toggle-text">
+        <div class="label">Frame Skip</div>
+        <div class="desc">Process every other frame — saves GPU</div>
+      </div>
+      <label class="sw"><input type="checkbox" id="sw-frameskip"><div class="sw-track"></div><div class="sw-thumb"></div></label>
+    </div>
+    <div class="toggle-row">
+      <div class="toggle-text">
+        <div class="label">Compute Shader</div>
+        <div class="desc">GLES 3.1+ — may be faster on some GPUs</div>
+      </div>
+      <label class="sw"><input type="checkbox" id="sw-compute"><div class="sw-track"></div><div class="sw-thumb"></div></label>
+    </div>
+    <div class="toggle-row">
+      <div class="toggle-text">
+        <div class="label">Async Framebuffer Copy</div>
+        <div class="desc">Reduces GPU stalls, adds 1 frame latency</div>
+      </div>
+      <label class="sw"><input type="checkbox" id="sw-pbo"><div class="sw-track"></div><div class="sw-thumb"></div></label>
+    </div>
+  </div>
+</div>
+
+<!-- Scope -->
+<div class="card" id="card-scope">
+  <div class="card-title">Apply To</div>
+  <div class="toggle-row">
+    <div class="toggle-text">
+      <div class="label">System UI</div>
+      <div class="desc">Status bar, notifications, nav bar</div>
+    </div>
+    <label class="sw"><input type="checkbox" id="sw-systemui"><div class="sw-track"></div><div class="sw-thumb"></div></label>
+  </div>
+  <div class="toggle-row">
+    <div class="toggle-text">
+      <div class="label">Launcher / Home Screen</div>
+    </div>
+    <label class="sw"><input type="checkbox" id="sw-launcher"><div class="sw-track"></div><div class="sw-thumb"></div></label>
+  </div>
+  <div class="toggle-row">
+    <div class="toggle-text">
+      <div class="label">Keyboard</div>
+    </div>
+    <label class="sw"><input type="checkbox" id="sw-keyboard"><div class="sw-track"></div><div class="sw-thumb"></div></label>
+  </div>
+</div>
+
+<div class="bottom-bar" id="bottom-bar">Changes apply within ~1 second</div>
+
+<!-- Debug log panel -->
+<div id="dbg-card" style="margin-top:16px;background:#0a0a0a;border:1px solid #2a2a2a;border-radius:14px;padding:14px;display:none">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+    <span style="font-size:12px;font-weight:600;color:#a78bfa">Debug Log</span>
+    <button onclick="document.getElementById('dbg-log').textContent=''" style="font-size:10px;color:#666;background:none;border:none;cursor:pointer">clear</button>
+  </div>
+  <pre id="dbg-log" style="font-size:10px;color:#aaa;line-height:1.6;white-space:pre-wrap;word-break:break-all;max-height:300px;overflow-y:auto"></pre>
+</div>
+
+<script>
+const CONF = '/data/local/tmp/wireframe/config.conf';
+const LOG_FILE = '/data/local/tmp/wireframe/webui.log';
+let cfg = {};
+
+// ── Debug logger ─────────────────────────────────────────────
+const _logBuf = [];
+let _logFlushPending = false;
+
+function log(msg) {
+  const ts = new Date().toISOString().slice(11,23);
+  const line = `[${ts}] ${msg}`;
+  console.log(line);
+
+  // Show panel and append line
+  const card = document.getElementById('dbg-card');
+  const el = document.getElementById('dbg-log');
+  if (card) card.style.display = 'block';
+  if (el) { el.textContent += line + '\n'; el.scrollTop = el.scrollHeight; }
+
+  // Buffer for file write
+  _logBuf.push(line);
+  if (!_logFlushPending) {
+    _logFlushPending = true;
+    setTimeout(_flushLog, 500);
+  }
+}
+
+async function _flushLog() {
+  _logFlushPending = false;
+  if (!_logBuf.length || typeof ksu === 'undefined') return;
+  const chunk = _logBuf.splice(0).join('\\n');
+  try {
+    await ksu.exec(`printf '${chunk.replace(/'/g,"'\\''") }\\n' >> "${LOG_FILE}" 2>/dev/null`);
+  } catch(e) {}
+}
+
+const DEFAULTS = {
+  enabled:'1', video_wireframe:'1', mode:'1',
+  shader_quality:'1', edge_threshold:'0.08',
+  edge_smooth_min:'0.05', edge_smooth_max:'0.20',
+  line_color_r:'1.0', line_color_g:'1.0', line_color_b:'1.0',
+  bg_color_r:'0.0', bg_color_g:'0.0', bg_color_b:'0.0',
+  bg_opacity:'0.0', line_intensity:'1.2',
+  resolution_scale:'1.0', use_compute:'0',
+  frame_skip:'0', use_half_float:'0', use_pbo:'0',
+  process_systemui:'1', process_launcher:'1', process_keyboard:'1',
+  blacklist:'', apply_all:'1',
+};
+
+const PRESETS = {
+  perf:     { shader_quality:'0', resolution_scale:'0.50', frame_skip:'1', use_compute:'0', use_pbo:'0' },
+  balanced: { shader_quality:'1', resolution_scale:'0.75', frame_skip:'0', use_compute:'0', use_pbo:'0' },
+  quality:  { shader_quality:'2', resolution_scale:'1.00', frame_skip:'0', use_compute:'0', use_pbo:'0' },
+  ultra:    { shader_quality:'3', resolution_scale:'1.00', frame_skip:'0', use_compute:'1', use_pbo:'0' },
+};
+
+// ── KSU exec wrapper ──────────────────────────────────────────
+async function exec(cmd) {
+  if (typeof ksu === 'undefined') {
+    log(`EXEC SKIP (ksu undef): ${cmd.slice(0,60)}`);
+    return { stdout: '', stderr: 'ksu unavailable', errno: 1 };
+  }
+  try {
+    const raw = await ksu.exec(cmd);
+    log(`EXEC raw type=${typeof raw} val=${JSON.stringify(raw).slice(0,120)}`);
+    if (typeof raw === 'string') return { stdout: raw, stderr: '', errno: 0 };
+    if (raw && typeof raw === 'object') {
+      const stdout = raw.stdout !== undefined ? raw.stdout : (raw.out !== undefined ? raw.out : (raw.output || ''));
+      return { stdout: String(stdout || ''), stderr: String(raw.stderr || raw.err || ''), errno: Number(raw.errno ?? raw.code ?? 0) };
+    }
+    return { stdout: '', stderr: '', errno: 0 };
+  } catch (e) {
+    log(`EXEC EXCEPTION: ${e}`);
+    return { stdout: '', stderr: String(e), errno: 1 };
+  }
+}
+
+// ── Config I/O ───────────────────────────────────────────────
+
+// KSU bridge may not be injected yet when page first runs.
+// Poll until exec actually works (not just until ksu is defined).
+async function waitForKSU(maxMs = 8000) {
+  log(`waitForKSU start, ksu=${typeof ksu}`);
+  const deadline = Date.now() + maxMs;
+  let attempt = 0;
+  while (Date.now() < deadline) {
+    attempt++;
+    const ksuDefined = typeof ksu !== 'undefined';
+    if (ksuDefined) {
+      try {
+        const r = await ksu.exec('echo ok');
+        const out = typeof r === 'string' ? r : (r?.stdout ?? r?.out ?? r?.output ?? '');
+        const trimmed = String(out).trim();
+        log(`waitForKSU attempt ${attempt}: raw=${JSON.stringify(r).slice(0,80)} trimmed="${trimmed}"`);
+        if (trimmed === 'ok') {
+          log(`waitForKSU READY after ${attempt} attempts`);
+          return true;
+        }
+      } catch(e) {
+        log(`waitForKSU attempt ${attempt} EXCEPTION: ${e}`);
+      }
+    } else {
+      log(`waitForKSU attempt ${attempt}: ksu still undefined`);
+    }
+    await new Promise(r => setTimeout(r, 200));
+  }
+  log(`waitForKSU TIMED OUT after ${attempt} attempts`);
+  return false;
+}
+
+function parseConf(output, result) {
+  for (const line of output.split(/\r?\n/)) {
+    const t = line.trim();
+    if (!t || t[0] === '#' || t[0] === '[') continue;
+    const eq = t.indexOf('=');
+    if (eq < 0) continue;
+    const k = t.slice(0, eq).trim();
+    const v = t.slice(eq + 1).trim();
+    if (k in result) result[k] = v;
+  }
+}
+
+// ksu.exec() returns only the LAST LINE of stdout.
+// To read a multi-line file we base64-encode it on the device (single-line output),
+// then atob()-decode in JS.
+async function readFileViab64(path) {
+  const r = await exec(`base64 -w 0 "${path}" 2>/dev/null`);
+  log(`b64 read ${path}: errno=${r.errno} b64len=${r.stdout.length} err="${r.stderr}"`);
+  if (!r.stdout.trim()) return '';
+  try {
+    const decoded = atob(r.stdout.trim());
+    log(`b64 decoded: ${decoded.length} bytes, first60="${decoded.slice(0,60)}"`);
+    return decoded;
+  } catch(e) {
+    log(`atob failed: ${e} raw="${r.stdout.slice(0,40)}"`);
+    return '';
+  }
+}
+
+async function loadConfig() {
+  log('loadConfig START');
+  const result = { ...DEFAULTS };
+  const ready = await waitForKSU();
+
+  if (!ready) {
+    log('loadConfig: KSU not ready, returning defaults');
+    if (typeof ksu !== 'undefined') ksu.toast('KSU bridge timeout — showing defaults');
+    return result;
+  }
+
+  // Confirm ksu multi-line behavior
+  const mlTest = await exec('echo line_a; echo line_b; echo line_c');
+  log(`multiline test: len=${mlTest.stdout.length} val="${mlTest.stdout.trim()}"`);
+
+  let output = await readFileViab64(CONF);
+
+  if (!output.trim()) {
+    log('runtime missing, trying persistent');
+    output = await readFileViab64('/data/adb/wireframe/config.conf');
+  }
+
+  if (output.trim()) {
+    parseConf(output, result);
+    log(`parsed: mode=${result.mode} threshold=${result.edge_threshold} intensity=${result.line_intensity}`);
+  } else {
+    log('BOTH files empty — using DEFAULTS');
+  }
+
+  log(`loadConfig DONE: mode=${result.mode} threshold=${result.edge_threshold} intensity=${result.line_intensity}`);
+  return result;
+}
+
+// Write all cfg values to file and notify engine
+async function writeConfig() {
+  const ver = Date.now();
+  // Use echo per line — avoids ANY newline/escape issues with ksu.exec multiline commands
+  const echos = Object.entries(cfg).map(([k, v]) => `echo '${k}=${v}'`).join(';');
+  const cmd = `{ ${echos}; } > "${CONF}" ; cp "${CONF}" /data/adb/wireframe/config.conf 2>/dev/null ; setprop wireframe.config.version ${ver}`;
+  log(`writeConfig: ${Object.keys(cfg).length} keys, ver=${ver}`);
+  log(`writeConfig cmd[0:150]: ${cmd.slice(0,150)}`);
+  const r = await exec(cmd);
+  log(`writeConfig result: errno=${r.errno} stderr="${r.stderr}"`);
+
+  const verifyB64 = await exec(`base64 -w 0 "${CONF}" 2>/dev/null`);
+  const verifyDecoded = verifyB64.stdout.trim() ? (() => { try { return atob(verifyB64.stdout.trim()); } catch(e) { return ''; } })() : '';
+  log(`writeConfig verify: ${verifyDecoded.length} bytes, first80="${verifyDecoded.slice(0,80)}"`);
+
+  if (r.errno !== 0 && typeof ksu !== 'undefined') ksu.toast('Save failed: ' + (r.stderr || r.errno));
+}
+
+async function saveKey(key, value) {
+  cfg[key] = String(value);
+  setSaving(true);
+  try { await writeConfig(); } catch (e) {
+    if (typeof ksu !== 'undefined') ksu.toast('Save error: ' + e.message);
+  }
+  setSaving(false);
+}
+
+async function saveMulti(pairs) {
+  for (const [k, v] of Object.entries(pairs)) cfg[k] = String(v);
+  setSaving(true);
+  await writeConfig();
+  setSaving(false);
+}
+
+// ── Debounce helper (for slider drag events only) ────────────
+function debounce(fn, ms) {
+  let t; return (...a) => { clearTimeout(t); t = setTimeout(() => fn(...a), ms); };
+}
+// Sliders use debounced save during drag; 'change' event on release
+// triggers an immediate saveKey to guarantee the final value is written.
+const dSave = debounce(saveKey, 100);
+
+// ── Color helpers ─────────────────────────────────────────────
+function floatsToHex(r, g, b) {
+  return '#' + [r, g, b].map(v => Math.round(parseFloat(v) * 255).toString(16).padStart(2, '0')).join('');
+}
+function hexToFloats(hex) {
+  return {
+    r: (parseInt(hex.slice(1,3),16)/255).toFixed(3),
+    g: (parseInt(hex.slice(3,5),16)/255).toFixed(3),
+    b: (parseInt(hex.slice(5,7),16)/255).toFixed(3),
+  };
+}
+
+// ── UI state ─────────────────────────────────────────────────
+function setSaving(s) {
+  const dot = document.getElementById('dot');
+  dot.className = 'status-dot ' + (s ? 'saving' : (cfg.enabled==='1' ? 'on' : ''));
+}
+
+function setDimmed(on) {
+  ['card-video','card-presets','card-mode','card-edge','card-appearance','card-perf','card-scope'].forEach(id => {
+    document.getElementById(id)?.classList.toggle('dimmed', !on);
+  });
+}
+
+function updateMasterDesc() {
+  const on = cfg.enabled === '1';
+  const el = document.getElementById('master-desc');
+  el.textContent = on ? 'Active — all apps are wireframed' : 'Disabled — passthrough mode';
+  el.style.color = on ? 'var(--primary)' : 'var(--text-dim)';
+  document.getElementById('dot').className = 'status-dot ' + (on ? 'on' : '');
+  setDimmed(on);
+}
+
+function detectPreset() {
+  for (const [name, p] of Object.entries(PRESETS)) {
+    if (Object.entries(p).every(([k, v]) => cfg[k] === v)) return name;
+  }
+  return null;
+}
+
+function applyToUI() {
+  // Master
+  document.getElementById('sw-enabled').checked = cfg.enabled === '1';
+  updateMasterDesc();
+
+  // Video
+  document.getElementById('sw-video').checked = cfg.video_wireframe !== '0';
+
+  // Preset highlight
+  const activePreset = detectPreset();
+  document.querySelectorAll('[data-preset]').forEach(el =>
+    el.classList.toggle('active', el.dataset.preset === activePreset));
+
+  // Mode chips
+  document.querySelectorAll('[data-mode]').forEach(el =>
+    el.classList.toggle('active', el.dataset.mode === cfg.mode));
+
+  // Quality chips
+  document.querySelectorAll('[data-q]').forEach(el =>
+    el.classList.toggle('active', el.dataset.q === cfg.shader_quality));
+
+  // Threshold slider (0.01–1.0 → 1–100)
+  const th = Math.round(parseFloat(cfg.edge_threshold) * 100);
+  document.getElementById('sl-threshold').value = th;
+  document.getElementById('v-threshold').textContent = parseFloat(cfg.edge_threshold).toFixed(2);
+
+  // Intensity slider (0.5–3.0 → 50–300)
+  const it = Math.round(parseFloat(cfg.line_intensity) * 100);
+  document.getElementById('sl-intensity').value = it;
+  document.getElementById('v-intensity').textContent = parseFloat(cfg.line_intensity).toFixed(1) + '×';
+
+  // Colors
+  const lhex = floatsToHex(cfg.line_color_r, cfg.line_color_g, cfg.line_color_b);
+  document.getElementById('col-line').value = lhex;
+  document.getElementById('hex-line').textContent = lhex;
+
+  const bhex = floatsToHex(cfg.bg_color_r, cfg.bg_color_g, cfg.bg_color_b);
+  document.getElementById('col-bg').value = bhex;
+  document.getElementById('hex-bg').textContent = bhex;
+
+  // Opacity slider
+  const op = Math.round(parseFloat(cfg.bg_opacity) * 100);
+  document.getElementById('sl-opacity').value = op;
+  document.getElementById('v-opacity').textContent = op + '%';
+
+  // Resolution slider (0.25–1.0 → 25–100)
+  const res = Math.round(parseFloat(cfg.resolution_scale) * 100);
+  document.getElementById('sl-resolution').value = res;
+  document.getElementById('v-resolution').textContent = res + '%';
+
+  // Performance toggles
+  document.getElementById('sw-frameskip').checked = cfg.frame_skip !== '0';
+  document.getElementById('sw-compute').checked = cfg.use_compute === '1';
+  document.getElementById('sw-pbo').checked = cfg.use_pbo === '1';
+
+  // Scope toggles
+  document.getElementById('sw-systemui').checked = cfg.process_systemui !== '0';
+  document.getElementById('sw-launcher').checked = cfg.process_launcher !== '0';
+  document.getElementById('sw-keyboard').checked = cfg.process_keyboard !== '0';
+}
+
+// ── Actions ──────────────────────────────────────────────────
+async function applyPreset(name) {
+  const p = PRESETS[name];
+  if (!p) return;
+  Object.assign(cfg, p);
+  await saveMulti(p);
+  applyToUI();
+  if (typeof ksu !== 'undefined') ksu.toast('Preset: ' + name);
+}
+
+async function setMode(m) {
+  await saveKey('mode', m);
+  document.querySelectorAll('[data-mode]').forEach(el =>
+    el.classList.toggle('active', parseInt(el.dataset.mode) === m));
+}
+
+async function setQuality(q) {
+  await saveKey('shader_quality', q);
+  document.querySelectorAll('[data-q]').forEach(el =>
+    el.classList.toggle('active', parseInt(el.dataset.q) === q));
+  // Invalidate preset highlight
+  document.querySelectorAll('[data-preset]').forEach(el =>
+    el.classList.toggle('active', el.dataset.preset === detectPreset()));
+}
+
+// ── Bind controls ────────────────────────────────────────────
+function bindControls() {
+  // Master
+  document.getElementById('sw-enabled').addEventListener('change', e => {
+    cfg.enabled = e.target.checked ? '1' : '0';
+    saveKey('enabled', cfg.enabled);
+    updateMasterDesc();
+  });
+
+  // Video
+  document.getElementById('sw-video').addEventListener('change', e => {
+    saveKey('video_wireframe', e.target.checked ? '1' : '0');
+  });
+
+  // Threshold
+  document.getElementById('sl-threshold').addEventListener('input', e => {
+    const v = (parseInt(e.target.value) / 100).toFixed(2);
+    document.getElementById('v-threshold').textContent = v;
+    dSave('edge_threshold', v);
+    document.querySelectorAll('[data-preset]').forEach(el => el.classList.remove('active'));
+  });
+  document.getElementById('sl-threshold').addEventListener('change', e => {
+    saveKey('edge_threshold', (parseInt(e.target.value) / 100).toFixed(2));
+  });
+
+  // Intensity
+  document.getElementById('sl-intensity').addEventListener('input', e => {
+    const v = (parseInt(e.target.value) / 100).toFixed(2);
+    document.getElementById('v-intensity').textContent = parseFloat(v).toFixed(1) + '×';
+    dSave('line_intensity', v);
+  });
+  document.getElementById('sl-intensity').addEventListener('change', e => {
+    saveKey('line_intensity', (parseInt(e.target.value) / 100).toFixed(2));
+  });
+
+  // Line color
+  document.getElementById('col-line').addEventListener('input', e => {
+    document.getElementById('hex-line').textContent = e.target.value;
+    const { r, g, b } = hexToFloats(e.target.value);
+    dSave('line_color_r', r); dSave('line_color_g', g); dSave('line_color_b', b);
+  });
+  document.getElementById('col-line').addEventListener('change', e => {
+    const { r, g, b } = hexToFloats(e.target.value);
+    saveKey('line_color_r', r); saveKey('line_color_g', g); saveKey('line_color_b', b);
+  });
+
+  // BG color
+  document.getElementById('col-bg').addEventListener('input', e => {
+    document.getElementById('hex-bg').textContent = e.target.value;
+    const { r, g, b } = hexToFloats(e.target.value);
+    dSave('bg_color_r', r); dSave('bg_color_g', g); dSave('bg_color_b', b);
+  });
+  document.getElementById('col-bg').addEventListener('change', e => {
+    const { r, g, b } = hexToFloats(e.target.value);
+    saveKey('bg_color_r', r); saveKey('bg_color_g', g); saveKey('bg_color_b', b);
+  });
+
+  // Opacity
+  document.getElementById('sl-opacity').addEventListener('input', e => {
+    const v = (parseInt(e.target.value) / 100).toFixed(2);
+    document.getElementById('v-opacity').textContent = parseInt(e.target.value) + '%';
+    dSave('bg_opacity', v);
+  });
+  document.getElementById('sl-opacity').addEventListener('change', e => {
+    saveKey('bg_opacity', (parseInt(e.target.value) / 100).toFixed(2));
+  });
+
+  // Resolution
+  document.getElementById('sl-resolution').addEventListener('input', e => {
+    const v = (parseInt(e.target.value) / 100).toFixed(2);
+    document.getElementById('v-resolution').textContent = parseInt(e.target.value) + '%';
+    dSave('resolution_scale', v);
+    document.querySelectorAll('[data-preset]').forEach(el =>
+      el.classList.toggle('active', el.dataset.preset === detectPreset()));
+  });
+  document.getElementById('sl-resolution').addEventListener('change', e => {
+    saveKey('resolution_scale', (parseInt(e.target.value) / 100).toFixed(2));
+  });
+
+  // Performance
+  document.getElementById('sw-frameskip').addEventListener('change', e => {
+    saveKey('frame_skip', e.target.checked ? '1' : '0');
+    document.querySelectorAll('[data-preset]').forEach(el =>
+      el.classList.toggle('active', el.dataset.preset === detectPreset()));
+  });
+  document.getElementById('sw-compute').addEventListener('change', e => {
+    saveKey('use_compute', e.target.checked ? '1' : '0');
+    document.querySelectorAll('[data-preset]').forEach(el =>
+      el.classList.toggle('active', el.dataset.preset === detectPreset()));
+  });
+  document.getElementById('sw-pbo').addEventListener('change', e =>
+    saveKey('use_pbo', e.target.checked ? '1' : '0'));
+
+  // Scope
+  document.getElementById('sw-systemui').addEventListener('change', e =>
+    saveKey('process_systemui', e.target.checked ? '1' : '0'));
+  document.getElementById('sw-launcher').addEventListener('change', e =>
+    saveKey('process_launcher', e.target.checked ? '1' : '0'));
+  document.getElementById('sw-keyboard').addEventListener('change', e =>
+    saveKey('process_keyboard', e.target.checked ? '1' : '0'));
+}
+
+// ── Init ─────────────────────────────────────────────────────
+(async () => {
+  log(`PAGE INIT — ksu=${typeof ksu} ua=${navigator.userAgent.slice(0,60)}`);
+  try {
+    cfg = await loadConfig();
+    log(`applyToUI: mode=${cfg.mode} threshold=${cfg.edge_threshold} intensity=${cfg.line_intensity}`);
+    applyToUI();
+    bindControls();
+    document.getElementById('loading').style.display = 'none';
+    log('INIT COMPLETE');
+  } catch (e) {
+    log(`INIT ERROR: ${e.message}\n${e.stack}`);
+    document.getElementById('loading').innerHTML =
+      `<div style="color:var(--danger);text-align:center;padding:24px">
+        Failed to load config<br><small style="color:var(--text-dim)">${e.message}</small>
+      </div>`;
+  }
+})();
+</script>
+</body>
+</html>

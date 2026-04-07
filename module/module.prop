@@ -1,0 +1,7 @@
+id=wireframe-engine
+name=Wireframe Render Engine
+version=v1.0.0
+versionCode=100
+author=WireframeEngine
+description=System-wide GPU-accelerated wireframe rendering via Sobel edge detection. Hooks all EGL surfaces including apps, SystemUI, games, videos, and status bar. Optimized for Adreno GPUs.
+updateJson=
